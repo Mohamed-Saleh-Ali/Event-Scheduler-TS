@@ -1,20 +1,35 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { SignUp } from "./network/Fetches";
+import { isApiError } from "./types";
+
+interface SignUpFormValues {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+interface SignUpFormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+}
 
 export default function SignUpForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<SignUpFormValues>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<SignUpFormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [authError, setAuthError] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -22,7 +37,7 @@ export default function SignUpForm() {
   };
 
   const validate = () => {
-    const next = {};
+    const next: SignUpFormErrors = {};
 
     if (!form.name.trim()) {
       next.name = "Enter your name";
@@ -48,7 +63,7 @@ export default function SignUpForm() {
     return Object.keys(next).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -59,6 +74,11 @@ export default function SignUpForm() {
       navigate("/signin");
     } catch (err) {
       console.error(err);
+
+      if (!isApiError(err)) {
+        setAuthError("Something went wrong. Please try again.");
+        return;
+      }
 
       switch (err.kind) {
         case "conflict":
