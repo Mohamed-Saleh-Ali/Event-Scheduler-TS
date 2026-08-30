@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- this file intentionally exports the useAuth hook alongside the provider, same shape as the original AuthContext.jsx */
 import { createContext, useContext, useState, type ReactNode } from 'react'
 
 interface AuthContextValue {
