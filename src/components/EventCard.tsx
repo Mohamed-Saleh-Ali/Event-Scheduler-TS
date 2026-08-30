@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
+import type { EventItem } from '../types'
 
-export default function EventCard({ event }) {
+export default function EventCard({ event }: { event: EventItem }) {
   const formattedDate = new Date(event.date).toLocaleString('de-DE', {
     dateStyle: 'medium',
     timeStyle: 'short'

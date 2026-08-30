@@ -1,13 +1,8 @@
-import { useState, use } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { useAuth } from './context/AuthContext.jsx'
+import { useAuth } from './context/AuthContext'
 
-  // function logOf(){
-  //   loggedOf()
-  //   localStorage.removeItem('e-api-token');// added clear Localstorage when Logout is clicked
-  // }
-
-export default function Navbar () {
+export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const { isLoggedIn, loggedOf } = useAuth()
 
