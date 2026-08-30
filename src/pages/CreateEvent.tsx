@@ -1,8 +1,17 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { createEvent, isLoggedIn } from '../utils/api'
 
-const initialForm = {
+interface CreateEventFormValues {
+  title: string
+  description: string
+  date: string
+  location: string
+  latitude: string
+  longitude: string
+}
+
+const initialForm: CreateEventFormValues = {
   title: '',
   description: '',
   date: '',
@@ -13,9 +22,9 @@ const initialForm = {
 
 export default function CreateEvent() {
   const navigate = useNavigate()
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState<CreateEventFormValues>(initialForm)
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   // TODO(after Bernd's AuthContext + ProtectedLayout merge): remove this
   // inline guard, this route will be wrapped by <ProtectedLayout /> instead.
@@ -32,12 +41,12 @@ export default function CreateEvent() {
     )
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setSubmitting(true)
     setError(null)
@@ -56,7 +65,7 @@ export default function CreateEvent() {
       const created = await createEvent(payload)
       navigate(`/events/${created.id}`)
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
       setSubmitting(false)
     }
   }
