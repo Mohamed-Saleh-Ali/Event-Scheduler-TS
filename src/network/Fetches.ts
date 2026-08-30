@@ -2,7 +2,7 @@ import type { ApiError, ApiErrorKind } from '../types'
 
 const basePath = 'http://localhost:3001/'
 
-async function safeJson(res: Response): Promise<any> {
+async function safeJson(res: Response): Promise<unknown> {
   try {
     return await res.json()
   } catch {
@@ -10,7 +10,16 @@ async function safeJson(res: Response): Promise<any> {
   }
 }
 
-function buildError(status: number, body: any, kind: ApiErrorKind, fallbackMessage: string): ApiError {
+// Pulls a human-readable message out of whatever the API sent back,
+// without assuming the shape (that's what the "any" used to paper over).
+function readMessage(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null) return undefined
+  const record = body as Record<string, unknown>
+  const value = record.message ?? record.error
+  return typeof value === 'string' ? value : undefined
+}
+
+function buildError(status: number, body: unknown, kind: ApiErrorKind, fallbackMessage: string): ApiError {
   if (body === undefined) {
     // res.json() itself threw - body wasn't parseable JSON
     return {
@@ -20,7 +29,7 @@ function buildError(status: number, body: any, kind: ApiErrorKind, fallbackMessa
         'Technical problems occurred. Please try again later or contact your administrator.',
     }
   }
-  return { kind, status, message: body?.message || body?.error || fallbackMessage }
+  return { kind, status, message: readMessage(body) ?? fallbackMessage }
 }
 
 interface SignUpFormValues {
@@ -105,7 +114,7 @@ export async function SignIn(form: SignInFormValues) {
   if (res.status === 200) {
     const data = await safeJson(res)
     console.log('Sign in succeeded:', data)
-    return data
+    return data as { token: string; user: { id: number; email: string } }
   }
 
   if (res.status === 403) {
