@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import EventCard from '../components/EventCard'
 import { getEvents } from '../utils/api'
+import type { EventItem } from '../types'
 
 export default function Home() {
-  const [events, setEvents] = useState([])
+  const [events, setEvents] = useState<EventItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let ignore = false
@@ -18,7 +19,7 @@ export default function Home() {
         const data = await getEvents({ page: 1, limit: 50 })
         if (!ignore) setEvents(data.results)
       } catch (err) {
-        if (!ignore) setError(err.message)
+        if (!ignore) setError(err instanceof Error ? err.message : 'Something went wrong.')
       } finally {
         if (!ignore) setLoading(false)
       }

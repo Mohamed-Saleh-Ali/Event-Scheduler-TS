@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { decodeToken, deleteEvent, getEventById } from '../utils/api'
+import type { EventItem } from '../types'
 
 export default function EventDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
 
-  const [event, setEvent] = useState(null)
+  const [event, setEvent] = useState<EventItem | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
+    if (!id) return
     let ignore = false
 
     async function loadEvent() {
@@ -19,10 +21,10 @@ export default function EventDetails() {
       setError(null)
 
       try {
-        const data = await getEventById(id)
+        const data = await getEventById(id!)
         if (!ignore) setEvent(data)
       } catch (err) {
-        if (!ignore) setError(err.message)
+        if (!ignore) setError(err instanceof Error ? err.message : 'Something went wrong.')
       } finally {
         if (!ignore) setLoading(false)
       }
@@ -69,10 +71,10 @@ export default function EventDetails() {
     setError(null)
 
     try {
-      await deleteEvent(id)
+      await deleteEvent(id!)
       navigate('/')
     } catch (err) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Something went wrong.')
       setDeleting(false)
     }
   }
